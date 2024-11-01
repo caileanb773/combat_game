@@ -2,51 +2,49 @@ package Actor;
 
 import java.util.List;
 import java.util.Random;
-import java.util.Scanner;
 
 import Usable.Equipment;
-import Utility.User;
+import Utility.GameUtility;
 
 public class Actor {
 	
 	// name, description
-	private String name;
-	private String desc;
-	List<Equipment> gear;
+	protected String name;
+	protected String desc;
+	protected List<Equipment> gear;
 	
 	// stats
-	private int level;
-	private int baseLvlExp;
-	private int experience;
-	private int expToNextLvl;
-	private int strength;
-	private double minAtkDamage;
-	private double maxAtkDamage;
-	private int dexterity;
-	private double baseChanceToHit;
-	private double chanceToHit;
-	private int defense;
-	private int vitality;
-	private int maxHP;
-	private int currentHP;
-	private int baseHP;
-	private int hpPerLevel;
-	private int hpPerVitality;
+	protected int level;
+	protected int baseLvlExp;
+	protected int experience;
+	protected int expToNextLvl;
+	protected int strength;
+	protected double minAtkDamage;
+	protected double maxAtkDamage;
+	protected int dexterity;
+	protected double baseChanceToHit;
+	protected double chanceToHit;
+	protected int defense;
+	protected int vitality;
+	protected int maxHP;
+	protected int currentHP;
+	protected int baseHP;
+	protected int hpPerLevel;
+	protected int hpPerVitality;
 	
 	// utility
-	User u = new User();
+	GameUtility gUtil = new GameUtility();
 	// this may need to be deleted
-	Scanner in = new Scanner(System.in);
 	
 	public Actor() {
 		
 	}
 	
 	// parameterized constructor
-	public Actor(String name, String desc, int str, int dex, double baseChanceHit, int vit, int baseHP, int hpPerLvl, int hpPerVit) {
+	public Actor(String name, String desc, int lvl, int str, int dex, double baseChanceHit, int vit, int baseHP, int hpPerLvl, int hpPerVit) {
 		this.name = name;
 		this.desc = desc;
-		this.level = 1;
+		this.level = lvl;
 		this.experience = 0;
 		this.strength = str;
 		this.dexterity = dex; 
@@ -55,7 +53,6 @@ public class Actor {
 		this.baseHP = baseHP;
 		this.hpPerLevel = hpPerLvl;
 		this.hpPerVitality = hpPerVit;
-		this.currentHP = maxHP;
 		calculateDependentStats();
 	}
 	
@@ -77,6 +74,7 @@ public class Actor {
 		this.defense = (dexterity * 2);
 		this.chanceToHit = (100 - baseChanceToHit) + (dexterity * 1.5);
 		this.maxHP = baseHP + (hpPerLevel * level) + (vitality * hpPerVitality);
+		this.currentHP = this.maxHP;
 	}
 	
 	// leveling up
@@ -87,16 +85,14 @@ public class Actor {
 		
 		// Recalculate dependent stats
 		calculateDependentStats();
-		
-		// Reset HP to max
-		this.currentHP = maxHP;
 	}
 	
 	public void levelUpUserPrompt() {
+		
 		for (int i = 0; i < 3; i ++) {
 			while (true) {
 				System.out.println("Which stat would you like to level up?");
-				if (incrementStat(u.getUserIn(in))) {
+				if (incrementStat(gUtil.getUserInputStr(GameUtility.in))) {
 					break;
 				} else {
 					continue;
@@ -108,7 +104,6 @@ public class Actor {
 	public void incrStatFeedback(String stat) {
 		System.out.println("[" + stat + "] increased by 1.");
 	}
-	
 	
 	// TODO implement this with enums possibly
 	public boolean incrementStat(String stat) {
@@ -146,7 +141,7 @@ public class Actor {
 	
 	/* This section is dedicated to attack and defenses modifiers (mostly for gear)*/
 	
-	// TODO check that calculateDependentStats doesn't overwrite modifiers
+	// TODO check that calculateDependentStats doesn't overwrite modifiers (i think it does)
 	
 	public void modifyStrength(int value) {
 		this.strength += value;
@@ -165,15 +160,31 @@ public class Actor {
 	
 	/* This section is dedicated to combat methods */
 	
-	public double calculateDamage() {
-		Random r = new Random();
-		return r.nextDouble(minAtkDamage, maxAtkDamage);
+	public boolean isAlive() {
+		if (this.currentHP > 0) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 	
-	public void takeDamage(double value) {
-		this.currentHP -= value;
-		if (currentHP <= 0) {
-			actorDeath();
+	public String showActorHP() {
+		return "[" + this.name + "] HP: " + this.currentHP;
+	}
+	
+	// TODO probably find a better way than hard printing to console
+	public int attack(Actor target) {
+		// calculate if the hit connects based on chance to hit
+		if (hitConnects(target)) {
+			
+			// probably find a better way than casting to an int here
+			int damage = (int)calculateDamage();
+			target.takeDamage(damage);
+			System.out.println(this.name + " hit " + target.name + " for " + damage + " damage!");
+			return damage;
+		} else {
+			System.out.println(this.name + "'s attack missed!");
+			return 0;
 		}
 	}
 	
@@ -187,24 +198,33 @@ public class Actor {
  		return randomValue < (attackChance - targetDefense);
 	}
 	
-	public void attack(Actor target) {
-		// calculate if the hit connects based on chance to hit
-		if (hitConnects(target)) {
-			double damage = calculateDamage();
-			target.takeDamage(damage);
-		} else {
-			System.out.println("Attack missed! GABAGOOL THIS IS A PLACEHOLDER DELETE ME GABAGOOL");
+	public double calculateDamage() {
+		Random r = new Random();
+		return r.nextDouble(minAtkDamage, maxAtkDamage);
+	}
+	
+	public void takeDamage(double value) {
+		this.currentHP -= value;
+		if (currentHP <= 0) {
+			actorDeath();
 		}
 	}
 	
 	public void actorDeath() {
 		System.out.println(this.name + " died.");
 	}
-	
-	/* Miscellaneous */
+
 	@Override
 	public String toString() {
-		return "Name: " + this.name + "Description: " + this.desc;
+		return "Actor [name=" + name + ", desc=" + desc + ", gear=" + gear + ", level=" + level + ", baseLvlExp="
+				+ baseLvlExp + ", experience=" + experience + ", expToNextLvl=" + expToNextLvl + ", strength="
+				+ strength + ", minAtkDamage=" + minAtkDamage + ", maxAtkDamage=" + maxAtkDamage + ", dexterity="
+				+ dexterity + ", baseChanceToHit=" + baseChanceToHit + ", chanceToHit=" + chanceToHit + ", defense="
+				+ defense + ", vitality=" + vitality + ", maxHP=" + maxHP + ", currentHP=" + currentHP + ", baseHP="
+				+ baseHP + ", hpPerLevel=" + hpPerLevel + ", hpPerVitality=" + hpPerVitality + "]";
 	}
+	
+	/* Miscellaneous */
+
 	
 }
