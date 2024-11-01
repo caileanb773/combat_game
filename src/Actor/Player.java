@@ -8,14 +8,15 @@ public class Player extends Actor {
 
 	@Override
 	public String toString() {
-		return "Player Info:\n"
-				+ "Name: " + this.name + "\n"
-				+ "Lvl: [" + this.level + "]\n"
-				+ "Str: [" + this.strength + "]\n"
-				+ "Dex: [" + this.dexterity + "]\n"
-				+ "Vit: [" + this.vitality + "]\n"
-				+ "Exp: [" + this.experience + "]\n"
-				+ "Next Lvl: [" + (this.expToNextLvl - this.experience) + "]\n";
+		return "Player Stats:\n"
+				+ "Name: \t" + this.name + "\n"
+				+ "HP: \t[" + this.currentHP + "/" + this.maxHP + "] hp\n"
+				+ "Lvl: \t[" + this.level + "]\n"
+				+ "Str: \t[" + this.strength + "]\n"
+				+ "Dex: \t[" + this.dexterity + "]\n"
+				+ "Vit: \t[" + this.vitality + "]\n"
+				+ "Exp: \t[" + this.experience + "] xp\n"
+				+ "Next: \t[" + (this.expToNextLvl - this.experience) + "] xp\n";
 	}
 	
 	

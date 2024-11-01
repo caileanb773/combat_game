@@ -7,7 +7,7 @@ public class GameUtility {
 	
 	public static final Scanner in = new Scanner(System.in);
 	
-	public String getUserInputStr(Scanner in) {
+	public static String getUserInputStr(Scanner in) {
 		String userIn = null;
 		
 		while (true) {
@@ -21,7 +21,7 @@ public class GameUtility {
 		return userIn;
 	}
 	
-	public int getUserInputInt(Scanner in) {
+	public static int getUserInputInt(Scanner in) {
 		int userIn = 0;
 		
 		while (true) {
