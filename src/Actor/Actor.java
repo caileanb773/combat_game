@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Random;
 
 import Usable.Equipment;
+import Usable.Item;
 import Utility.GameUtility;
 
 public class Actor {
@@ -12,6 +13,7 @@ public class Actor {
 	protected String name;
 	protected String desc;
 	protected List<Equipment> gear;
+	protected List<Item> items;
 
 	// stats
 	protected int level;
@@ -74,13 +76,16 @@ public class Actor {
 	}
 
 	// TODO small bug here that shows player's XP as being -50 before showing the correct amount
+	// Has to do with this.toString being called before calculateDependentStats()
+	// could make another method to *just* show combat stats during level up.
 	
 	// leveling up
 	public void levelUp() {
-		this.level++; // increment player's level
+		this.level++;
+		System.out.println("You leveled up!");
 		System.out.println(this.toString());
-		levelUpUserPrompt(); // ask them which stat they would like to level up
-		calculateDependentStats(); // Recalculate dependent stats
+		levelUpUserPrompt();
+		calculateDependentStats();
 		System.out.println(this.toString());
 	}
 
@@ -91,7 +96,7 @@ public class Actor {
 
 		for (int i = 0; i < pointsToSpend; i ++) {
 			while (true) {
-				System.out.println("Which stat would you like to level up?");
+				System.out.println("Choose a stat to increase: [" + (pointsToSpend - i) + "] points remaining.");
 				if (incrementStat(GameUtility.getUserInputStr(GameUtility.in))) {
 					break;
 				} else {
@@ -255,18 +260,6 @@ public class Actor {
 		gainExp(xpReward);
 	}
 
-	public boolean isAlive() {
-		if (this.currentHP >= 0) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	public String showActorHP() {
-		return this.name + " HP: [" + this.currentHP + "/" + this.maxHP + "]";
-	}
-
 	// TODO probably find a better way than hard printing to console
 	public int attack(Actor target) {
 		System.out.println(this.name + " goes in for an attack!");
@@ -318,6 +311,39 @@ public class Actor {
 				+ dexterity + ", baseChanceToHit=" + baseChanceToHit + ", chanceToHit=" + chanceToHit + ", defense="
 				+ defense + ", vitality=" + vitality + ", maxHP=" + maxHP + ", currentHP=" + currentHP + ", baseHP="
 				+ baseHP + ", hpPerLevel=" + hpPerLevel + ", hpPerVitality=" + hpPerVitality + "]";
+	}
+	
+	/* ==================== This section is dedicated to actor status methods ==================== */
+	
+	public boolean isAlive() {
+		if (this.currentHP >= 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public String showActorHP() {
+		return this.name + " HP: [" + this.currentHP + "/" + this.maxHP + "]";
+	}
+	
+	public void heal(int amount) {
+		this.currentHP += amount;
+		if (this.currentHP > this.maxHP) {
+			this.currentHP = this.maxHP;
+		}
+	}
+	
+	/* ==================== This section is dedicated to item consumption ==================== */
+	
+	public void displayItemInv() {
+		for (Item item: items) {
+			System.out.println("[" + item + "]");
+		}
+	}
+	
+	public void useItem() {
+		// TODO finish this
 	}
 
 	/* ==================== Miscellaneous ==================== */
